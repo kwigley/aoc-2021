@@ -1,9 +1,34 @@
+use itertools::Itertools;
+
 pub fn part_one(input: &str) -> Option<u32> {
-    None
+    Some(
+        input
+            .lines()
+            .tuple_windows()
+            .map(|(a, b)| {
+                a.parse::<u32>().expect("bad input") < b.parse::<u32>().expect("bad input")
+            })
+            .filter(|v| *v)
+            .count() as u32,
+    )
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    Some(
+        input
+            .lines()
+            .tuple_windows()
+            .map(|items: (&str, &str, &str)| {
+                [items.0, items.1, items.2]
+                    .iter()
+                    .map(|item| item.parse::<u32>().expect("bad input"))
+                    .sum::<u32>()
+            })
+            .tuple_windows()
+            .map(|(a, b)| a < b)
+            .filter(|v| *v)
+            .count() as u32,
+    )
 }
 
 fn main() {
