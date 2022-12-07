@@ -1,9 +1,52 @@
+#![feature(drain_filter)]
+
 pub fn part_one(input: &str) -> Option<u32> {
-    None
+    let width = input.lines().next()?.len();
+    let count = input.lines().count();
+    let gamma = input
+        .lines()
+        .map(|l| usize::from_str_radix(l, 2).unwrap())
+        .fold(vec![0; width], |count, bits| {
+            count
+                .into_iter()
+                .enumerate()
+                .map(|(i, n)| n + ((bits & 1 << i) >> i))
+                .collect()
+        })
+        .into_iter()
+        .enumerate()
+        .map(|(i, b)| ((b >= count / 2) as u32) << i)
+        .sum::<u32>();
+    Some(gamma * (!gamma & ((1 << width) - 1)))
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    let width = input.lines().next()?.len();
+    let nums = input
+        .lines()
+        .map(|l| u32::from_str_radix(l, 2).unwrap())
+        .collect::<Vec<_>>();
+
+    let oxy = (0..width)
+        .rev()
+        .scan(nums.clone(), |oxy, i| {
+            let one = oxy.iter().filter(|n| *n & 1 << i > 0).count() >= (oxy.len() + 1) / 2;
+            oxy.drain_filter(|n| (*n & 1 << i > 0) != one);
+            oxy.first().copied()
+        })
+        .last()
+        .unwrap();
+
+    let co2 = (0..width)
+        .rev()
+        .scan(nums, |co2, i| {
+            let one = co2.iter().filter(|n| *n & 1 << i > 0).count() >= (co2.len() + 1) / 2;
+            co2.drain_filter(|n| (*n & 1 << i > 0) == one);
+            co2.first().copied()
+        })
+        .last()
+        .unwrap();
+    Some(oxy * co2)
 }
 
 fn main() {
